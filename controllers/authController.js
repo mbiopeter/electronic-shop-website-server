@@ -29,9 +29,9 @@ const signUpController = async (req, res) => {
 };
 
 const verifyEmailController = async (req, res) => {
-    const { token, email } = req.query;
+    const { token } = req.query;
     try {
-        const result = await verifyEmail(token, email);
+        const result = await verifyEmail(token);
         res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ error: error.message });

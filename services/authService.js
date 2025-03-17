@@ -19,14 +19,14 @@ const sendConfirmationEmail = async (email, verificationLink, type) => {
         subject: type === 'verify' ? "Verify Your Email Address" : "Your Email Has Been Verified! 🎉",
         html: type === 'verify' ? `
             <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-                <h2 style="color: #333;">Welcome to Affirm!</h2>
+                <h2 style="color: #333;">Welcome to Shoppers!</h2>
                 <p style="font-size: 16px;">Thank you for signing up. Please click the link below to verify your email address and activate your account:</p>
                 <a href="${verificationLink}" style="font-size: 16px; color: #007bff;">Verify Your Email</a>
                 <p style="font-size: 14px; color: #555;">If you didn't sign up, you can safely ignore this email.</p>
                 <p style="font-size: 14px; color: #555;">Best Regards,<br>Affirm Support Team</p>
             </div>
         `: `<div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-            <h2 style="color: #333;">Welcome to Affirm!</h2>
+            <h2 style="color: #333;">Welcome to Shoppers!</h2>
             <p style="font-size: 16px;">Thank you for confirming your email address. You’re now all set to enjoy shopping with us. We’re thrilled to have you as part of our community, and we promise you’ll have a fantastic shopping experience.</br>
             Start exploring our amazing deals and products now, and enjoy all the perks of shopping exclusively with us!</p>
             <p style="font-size: 14px; color: #555;">Best Regards,<br>Affirm Support Team</p>
@@ -69,7 +69,7 @@ const signUp = async (email, name, password) => {
             verificationCode: verificationToken,
         });
 
-        const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}&email=${email}`;
+        const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
         const emailType = 'verify';
         await sendConfirmationEmail(email, verificationLink, emailType);
 
@@ -79,19 +79,22 @@ const signUp = async (email, name, password) => {
     }
 };
 
-const verifyEmail = async (token, email) => {
+const verifyEmail = async (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await Customer.findOne({ where: { email: decoded.email } });
-
         console.log(user);
         if (!user) {
             throw new Error('User not found');
         }
-
         if (user.verified) {
             throw new Error('Email already verified');
         }
+
+        if (user.verificationCode !== token) {
+            throw new Error('Token is invalid or has expired!');
+        }
+        const email = decoded.email;
         await Customer.update({ verified: true, verificationCode: null }, { where: { email } });
         const emailType = 'success';
         const verificationLink = null;
@@ -121,6 +124,12 @@ const login = async (email, password) => {
 
         // Ensure user is verified before generating a token
         if (!user.verified) {
+
+            const verificationToken = generateVerificationToken(email);
+            await Customer.update({ verificationCode: verificationToken }, { where: { email } });
+            const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+            const emailType = 'verify';
+            await sendConfirmationEmail(email, verificationLink, emailType);
             throw new Error('Please verify your email address first');
         }
 
