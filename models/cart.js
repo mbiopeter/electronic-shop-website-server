@@ -1,36 +1,23 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const Product = require("./products");
+const Customer = require("./customers");
 
 const Cart = sequelize.define(
 	"Cart",
 	{
-		id: {
-			type: DataTypes.INTEGER,
-			autoIncrement: true,
-			primaryKey: true,
-		},
-		userId: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: "Users", // Ensure this matches the actual table name
-				key: "id",
-			},
-			onDelete: "CASCADE",
-		},
-		productId: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: "Products", // Ensure this matches the actual table name
-				key: "id",
-			},
-			onDelete: "CASCADE",
-		},
 		quantity: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			defaultValue: 1,
+		},
+		userId: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+		},
+		productId: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
 		},
 		createdAt: {
 			type: DataTypes.DATE,
@@ -49,13 +36,5 @@ const Cart = sequelize.define(
 		createdAt: "createdAt",
 	}
 );
-
-Cart.associate = (models) => {
-	Cart.belongsTo(models.User, { foreignKey: "userId", onDelete: "CASCADE" });
-	Cart.belongsTo(models.Product, {
-		foreignKey: "productId",
-		onDelete: "CASCADE",
-	});
-};
 
 module.exports = Cart;

@@ -1,13 +1,14 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const Cart = require("./cart");
 
 const Product = sequelize.define(
 	"Product",
 	{
 		id: {
 			type: DataTypes.INTEGER,
-			autoIncrement: true,
 			primaryKey: true,
+			autoIncrement: true,
 		},
 		name: {
 			type: DataTypes.STRING,
@@ -69,5 +70,9 @@ const Product = sequelize.define(
 		updatedAt: "updatedAt",
 	}
 );
+
+Product.associate = () => {
+	Product.hasMany(Cart, { foreignKey: "productId" });
+};
 
 module.exports = Product;
