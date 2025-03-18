@@ -1,7 +1,13 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Sequelize instance
+const sequelize = require('../config/database');
+const Cart = require('./cart');
 
 const Customer = sequelize.define('Customer', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -66,5 +72,8 @@ const Customer = sequelize.define('Customer', {
   updatedAt: 'updatedAt',
   createdAt: 'createdAt'
 });
+Customer.associate = () => {
+  Customer.hasMany(Cart, { foreignKey: 'userId' });
+}
 
 module.exports = Customer;

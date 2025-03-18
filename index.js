@@ -4,6 +4,7 @@ const logger = require('./config/logger');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 6000;
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/cart', cartRoutes);
 
 // Log each request
 app.use((req, res, next) => {
