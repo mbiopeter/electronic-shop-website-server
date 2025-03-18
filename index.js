@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const sliderRoutes = require('./routes/sliderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 6000;
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/category', categoryRoutes);
+app.use('/slider', sliderRoutes);
 
 // Log each request
 app.use((req, res, next) => {
