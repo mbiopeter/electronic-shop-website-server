@@ -162,5 +162,4 @@ module.exports = {
 	getAllBestSellingsService,
 	getScrollListProductsService,
 	getExploreProductsService,
-	getWishListService,
 };
