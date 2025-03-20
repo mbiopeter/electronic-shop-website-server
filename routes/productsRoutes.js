@@ -7,7 +7,7 @@ const {
 	getWishListController,
 	addHistoryController,
 	getHistoryController,
-	getHistoryRelatedController
+	getHistoryRelatedController,
 } = require("../controllers/productController");
 
 const router = express.Router();

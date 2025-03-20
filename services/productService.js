@@ -1,5 +1,6 @@
 const Products = require("../models/products");
 const History = require("../models/history");
+const Wishlist = require("../models/wishlist");
 const { Sequelize, Op } = require("sequelize");
 
 const shuffleArray = (array) => {
@@ -191,6 +192,31 @@ const getHistoryRelatedService = async (userId) => {
 	}
 };
 
+const getWishlistService = async (userId) => {
+	try {
+		if (!userId) {
+			throw new Error("User id is required");
+		}
+
+		const wishlistItems = await Wishlist.findAll({
+			where: { userId },
+		});
+
+		const wishlistItemsIds = wishlistItems.map((item) => item.productId);
+
+		const products = await Products.findAll({
+			where: { id: wishlistItemsIds },
+		});
+		if (products.length === 0) {
+			throw new Error("No products found");
+		}
+
+		return formatProducts(products);
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
 module.exports = {
 	getAllProductsService,
 	getAllBestSellingsService,
@@ -199,4 +225,5 @@ module.exports = {
 	addHistoryService,
 	getHistoryService,
 	getHistoryRelatedService,
+	getWishlistService,
 };

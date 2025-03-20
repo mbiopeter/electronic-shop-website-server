@@ -3,10 +3,10 @@ const {
 	getAllBestSellingsService,
 	getScrollListProductsService,
 	getExploreProductsService,
-	getWishListService,
+	getWishlistService,
 	addHistoryService,
 	getHistoryService,
-	getHistoryRelatedService
+	getHistoryRelatedService,
 } = require("../services/productService");
 
 const getAllProductsController = async (req, res) => {
@@ -43,7 +43,8 @@ const getExploreProductsController = async (req, res) => {
 };
 const getWishListController = async (req, res) => {
 	try {
-		const response = await getWishListService();
+		const { userId } = req.query;
+		const response = await getWishlistService(userId);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json(error.message);
@@ -88,6 +89,5 @@ module.exports = {
 	getWishListController,
 	addHistoryController,
 	getHistoryController,
-	getHistoryRelatedController
-
+	getHistoryRelatedController,
 };
