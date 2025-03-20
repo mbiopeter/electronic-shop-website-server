@@ -13,12 +13,13 @@ const loginController = async (req, res) => {
 const signUpController = async (req, res) => {
     const { email, name, password, conPassword } = req.body;
     try {
+        console.log(req.body);
         if (!email || !name || !password || !conPassword) {
-            return res.status(400).json({ 'message': "All fields are required" });
+            return res.status(400).json({ 'error': "All fields are required" });
         }
 
         if (password !== conPassword) {
-            return res.status(400).json({ 'message': "Password does not match" });
+            return res.status(400).json({ 'error': "Password does not match" });
         }
 
         const { newUser } = await signUp(email, name, password);

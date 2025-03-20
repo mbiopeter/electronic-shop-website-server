@@ -62,8 +62,8 @@ const addHistoryController = async (req, res) => {
 
 const getHistoryController = async (req, res) => {
 	try {
-		const { userId } = req.query;
-		const response = await getHistoryService(userId);
+		const { id } = req.query;
+		const response = await getHistoryService(id);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json(error.message);
@@ -72,8 +72,8 @@ const getHistoryController = async (req, res) => {
 
 const getHistoryRelatedController = async (req, res) => {
 	try {
-		const { userId } = req.query;
-		const response = await getHistoryRelatedService(userId);
+		const { id } = req.query;
+		const response = await getHistoryRelatedService(id);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json(error.message);

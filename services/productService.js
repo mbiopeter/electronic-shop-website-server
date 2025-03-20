@@ -13,12 +13,19 @@ const formatProducts = (products) => {
 	return products.map((product) => {
 		const imgs = product.images ? JSON.parse(product.images) : [];
 		const imageUrl = imgs.map((img) => `http://localhost:4000/${img}`);
+
+		const variantType = product.variantType ? JSON.parse(product.variantType) : {};
+		const variantArray = Object.entries(variantType).map(([key, values]) => ({
+			name: key,
+			options: values,
+		}));
+
 		return {
 			id: product.id,
-			imageUrl,
+			images: imageUrl,
 			name: product.name,
 			category: product.category,
-			sub_category: product.subCategory,
+			subcategory: product.subCategory,
 			brand: product.brand,
 			desc: product.description,
 			price: parseFloat(product.price),
@@ -28,7 +35,7 @@ const formatProducts = (products) => {
 			ratingsCount: product.ratingsCount,
 			offerPrice: parseFloat(product.offerPrice),
 			quantity: product.quantity,
-			variantType: product.variantType ? JSON.parse(product.variantType) : [],
+			variantType: variantArray,
 		};
 	});
 };
@@ -50,6 +57,7 @@ const getAllProductsService = async () => {
 		throw new Error(error.message);
 	}
 };
+
 
 const getAllBestSellingsService = async () => {
 	try {
