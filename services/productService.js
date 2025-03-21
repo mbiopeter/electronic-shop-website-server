@@ -34,6 +34,49 @@ const formatProducts = (products) => {
 	});
 };
 
+//
+const insertProductsService = async () => {
+	try {
+		const products = await Products.bulkCreate([
+			{
+				name: "Wireless Bluetooth Headphones",
+				description: "Noise-canceling over-ear headphones with deep bass.",
+				category: "Electronics",
+				subCategory: "Headphones",
+				brand: "Sony",
+				price: 99.99,
+				offerPrice: 79.99,
+				quantity: 50,
+				variantType: { color: ["black", "white", "blue"] },
+				images: ["image1.jpg", "image2.jpg"],
+				ratings: 4,
+				ratingsCount: 250,
+				salesCount: 150,
+			},
+			{
+				name: "Gaming Laptop",
+				description: "High-performance gaming laptop with RTX 3060 GPU.",
+				category: "Computers",
+				subCategory: "Laptops",
+				brand: "ASUS",
+				price: 1499.99,
+				offerPrice: 1399.99,
+				quantity: 20,
+				variantType: {
+					RAM: ["16GB", "32GB"],
+					Storage: ["512GB SSD", "1TB SSD"],
+				},
+				images: ["laptop1.jpg", "laptop2.jpg"],
+				ratings: 5,
+				ratingsCount: 120,
+				salesCount: 80,
+			},
+		]);
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
 const getAllProductsService = async () => {
 	try {
 		const products = await Products.findAll({
@@ -137,11 +180,14 @@ const getHistoryService = async (userId) => {
 			where: { userId },
 		});
 
+		console.log("History Items:", historyItems);
 		const productIds = historyItems.map((item) => item.productId);
+		console.log("Product IDs from history:", productIds); // Debugging
 
 		const products = await Products.findAll({
-			where: { id: productIds },
+			where: { id: { [Op.in]: productIds } },
 		});
+		console.log("Products Found:", products); // Debugging
 
 		return formatProducts(products);
 	} catch (error) {
@@ -192,6 +238,25 @@ const getHistoryRelatedService = async (userId) => {
 	}
 };
 
+const addWishlistService = async (userId, productId) => {
+	try {
+		if (!userId || !productId) {
+			throw new Error("User id and product id required");
+		}
+		const exists = await Wishlist.findOne({ where: { userId, productId } });
+		if (exists) {
+			throw new Error("Product already in wishlist");
+		}
+		const create = await Wishlist.create({
+			userId,
+			productId,
+		});
+		return create;
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
 const getWishlistService = async (userId) => {
 	try {
 		if (!userId) {
@@ -202,14 +267,18 @@ const getWishlistService = async (userId) => {
 			where: { userId },
 		});
 
+		console.log("Wishlist Items:", wishlistItems);
+
 		const wishlistItemsIds = wishlistItems.map((item) => item.productId);
+		console.log("Product IDs from history:", wishlistItemsIds); // Debugging
 
 		const products = await Products.findAll({
-			where: { id: wishlistItemsIds },
+			where: { id: { [Op.in]: wishlistItemsIds } },
 		});
 		if (products.length === 0) {
-			throw new Error("No products found");
+			throw new Error("No wishlist found");
 		}
+		console.log("Wishlist Found:", products); // Debugging
 
 		return formatProducts(products);
 	} catch (error) {
@@ -217,8 +286,25 @@ const getWishlistService = async (userId) => {
 	}
 };
 
+const removeWishlistService = async (userId, productId) => {
+	try {
+		if (!userId || !productId) {
+			throw new Error("User id and product id required");
+		}
+		const exists = await Wishlist.findOne({ where: { userId, productId } });
+		if (!exists) {
+			throw new Error("Product not in wishlist");
+		}
+		const remove = await Wishlist.destroy({ where: { userId, productId } });
+		return remove;
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
 module.exports = {
 	getAllProductsService,
+	insertProductsService,
 	getAllBestSellingsService,
 	getScrollListProductsService,
 	getExploreProductsService,
@@ -226,4 +312,6 @@ module.exports = {
 	getHistoryService,
 	getHistoryRelatedService,
 	getWishlistService,
+	addWishlistService,
+	removeWishlistService,
 };

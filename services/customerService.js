@@ -1,6 +1,15 @@
 const Customers = require("../models/customers");
 const bcrypt = require("bcryptjs");
 
+const getAllCustomersService = async () => {
+	try {
+		const customers = await Customers.findAll();
+		return { success: true, customers };
+	} catch (error) {
+		throw new Eror(errror.message);
+	}
+};
+
 // Update customer account details
 const putAccountsDetailsService = async (id, data) => {
 	try {
@@ -71,4 +80,5 @@ const putBillingInfoService = async (id, data) => {
 module.exports = {
 	putAccountsDetailsService,
 	putBillingInfoService,
+	getAllCustomersService,
 };
