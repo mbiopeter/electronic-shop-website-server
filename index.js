@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productsRoutes = require("./routes/productsRoutes");
+const customerRoutes = require("./routes/customerRoutes");
 const sliderRoutes = require("./routes/sliderRoutes");
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/auth", authRoutes);
 app.use("/cart", cartRoutes);
 app.use("/category", categoryRoutes);
 app.use("/products", productsRoutes);
+app.use("/customer", customerRoutes);
 app.use("/slider", sliderRoutes);
 
 // Log each request

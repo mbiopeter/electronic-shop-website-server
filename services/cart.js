@@ -115,6 +115,7 @@ const getCartServices = async (userId) => {
 
             return {
                 id: item.id,
+                productId: product.id,
                 img: imageUrl[0] || null,
                 product: product.name,
                 price: product.offerPrice,

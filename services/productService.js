@@ -1,5 +1,6 @@
 const Products = require("../models/products");
-const History = require('../models/history');
+const History = require("../models/history");
+const Wishlist = require("../models/wishlist");
 const { Sequelize, Op } = require("sequelize");
 
 const shuffleArray = (array) => {
@@ -63,7 +64,7 @@ const getAllBestSellingsService = async () => {
 	try {
 		const products = await Products.findAll({
 			order: [["salesCount", "DESC"]],
-			limit: 8
+			limit: 8,
 		});
 
 		if (products.length === 0) {
@@ -116,7 +117,7 @@ const getExploreProductsService = async () => {
 const addHistoryService = async (productId, userId) => {
 	try {
 		if (!productId || !userId) {
-			throw new Error("product id and user id cannot be blank")
+			throw new Error("product id and user id cannot be blank");
 		}
 		//check if history exists
 		const exists = await History.findOne({ where: { userId, productId } });
@@ -126,35 +127,40 @@ const addHistoryService = async (productId, userId) => {
 		console.log("peter");
 		const create = await History.create({
 			productId,
-			userId
-		})
+			userId,
+		});
 		return create;
 	} catch (error) {
 		throw new Error(error.message);
 	}
-}
+};
 
 const getHistoryService = async (userId) => {
 	try {
 		if (!userId) {
-			throw new Error('User id is required');
+			throw new Error("User id is required");
 		}
 
 		const historyItems = await History.findAll({
-			where: { userId }
+			where: { userId },
+			order: [['id', 'DESC']],
 		});
 
-		const productIds = historyItems.map(item => item.productId);
+		const productIds = historyItems.map((item) => item.productId);
 
 		const products = await Products.findAll({
 			where: { id: productIds },
 		});
 
-		return formatProducts(products);
+		// Sort products based on history order
+		const productMap = new Map(products.map(product => [product.id, product]));
+		const sortedProducts = productIds.map(id => productMap.get(id));
+
+		return formatProducts(sortedProducts);
 	} catch (error) {
 		throw new Error(error.message);
 	}
-}
+};
 
 const getHistoryRelatedService = async (userId) => {
 	try {
@@ -165,7 +171,7 @@ const getHistoryRelatedService = async (userId) => {
 		const history = await History.findAll({ where: { userId } });
 
 		if (history.length > 0) {
-			const productIds = history.map(item => item.productId);
+			const productIds = history.map((item) => item.productId);
 
 			const relatedProducts = await Products.findAll({
 				where: {
@@ -178,7 +184,7 @@ const getHistoryRelatedService = async (userId) => {
 			const recommendedProducts = await Products.findAll({
 				where: {
 					category: {
-						[Op.in]: relatedProducts.map(p => p.category),
+						[Op.in]: relatedProducts.map((p) => p.category),
 					},
 				},
 				limit: 20,
@@ -194,12 +200,35 @@ const getHistoryRelatedService = async (userId) => {
 
 			return formatProducts(shuffledProducts.slice(0, 20));
 		}
-
 	} catch (error) {
 		throw new Error(error.message);
 	}
 };
 
+const getWishlistService = async (userId) => {
+	try {
+		if (!userId) {
+			throw new Error("User id is required");
+		}
+
+		const wishlistItems = await Wishlist.findAll({
+			where: { userId },
+		});
+
+		const wishlistItemsIds = wishlistItems.map((item) => item.productId);
+
+		const products = await Products.findAll({
+			where: { id: wishlistItemsIds },
+		});
+		if (products.length === 0) {
+			throw new Error("No products found");
+		}
+
+		return formatProducts(products);
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
 
 module.exports = {
 	getAllProductsService,
@@ -208,5 +237,6 @@ module.exports = {
 	getExploreProductsService,
 	addHistoryService,
 	getHistoryService,
-	getHistoryRelatedService
+	getHistoryRelatedService,
+	getWishlistService,
 };
