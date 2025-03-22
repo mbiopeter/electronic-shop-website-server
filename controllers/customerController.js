@@ -1,6 +1,7 @@
 const {
 	putAccountsDetailsService,
 	putBillingInfoService,
+	getAllCustomersService,
 } = require("../services/customerService");
 
 const putAccountsDetailsController = async (req, res) => {
@@ -36,7 +37,17 @@ const putBillingInfoController = async (req, res) => {
 	}
 };
 
+const getAllCustomersController = async (req, res) => {
+	try {
+		const response = await getAllCustomersService();
+		res.status(200).json(response);
+	} catch (error) {
+		res.status(500).json(error.message);
+	}
+};
+
 module.exports = {
 	putAccountsDetailsController,
 	putBillingInfoController,
+	getAllCustomersController,
 };

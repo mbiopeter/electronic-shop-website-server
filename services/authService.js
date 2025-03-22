@@ -46,7 +46,7 @@ const generateVerificationToken = (email) => {
 };
 
 const generateAuthToken = (user) => {
-    return jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET, { expiresIn: '24h' });
 };
 
 const signUp = async (email, name, password) => {
