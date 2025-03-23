@@ -6,7 +6,7 @@ const getAllCustomersService = async () => {
 		const customers = await Customers.findAll();
 		return { success: true, customers };
 	} catch (error) {
-		throw new Eror(errror.message);
+		throw new Error(error.message);
 	}
 };
 
