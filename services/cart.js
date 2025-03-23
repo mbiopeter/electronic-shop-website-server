@@ -118,8 +118,8 @@ const getCartServices = async (userId) => {
                 productId: product.id,
                 img: imageUrl[0] || null,
                 product: product.name,
-                price: product.offerPrice,
-                quantity: item.quantity
+                price: Number(product.offerPrice).toFixed(2),
+                quantity: Number.parseInt(item.quantity, 10) 
             };
         });
 

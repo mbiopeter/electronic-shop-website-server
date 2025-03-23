@@ -1,13 +1,13 @@
 const {
 	putAccountsDetailsService,
-	putBillingInfoService,
-	getAllCustomersService,
+	updateBillingInfoService,
+	getCustomersService,
 } = require("../services/customerService");
 
 const putAccountsDetailsController = async (req, res) => {
 	try {
-		const { id } = req.params; // Extract customer ID from URL
-		const updateData = req.body; // Get request body data
+		const { id } = req.params;
+		const updateData = req.body;
 		console.log(updateData);
 
 		const response = await putAccountsDetailsService(id, updateData);
@@ -21,25 +21,36 @@ const putAccountsDetailsController = async (req, res) => {
 	}
 };
 
-const putBillingInfoController = async (req, res) => {
+const updateBillingInfoController = async (req, res) => {
 	try {
-		const { id } = req.params; // Extract customer ID from URL
-		const updateData = req.body; // Get request body data
+		const {
+			userId,
+			firstName,
+			streetAdress,
+			apartment,
+			town,
+			phoneNumber,
+		} = req.body;
 
-		const response = await putBillingInfoService(id, updateData);
-		if (!response.success) {
-			return res.status(400).json({ success: false, error: response.error });
-		}
 
-		res.json({ success: true, customer: response.customer });
+		await updateBillingInfoService(
+			userId,
+			firstName,
+			streetAdress,
+			apartment,
+			town,
+			phoneNumber,
+		);
+		res.json({ message: "Billing information updated successfully" });
 	} catch (error) {
 		res.status(500).json(error.message);
 	}
 };
 
-const getAllCustomersController = async (req, res) => {
+const getCustomersController = async (req, res) => {
 	try {
-		const response = await getAllCustomersService();
+		const { userId } = req.query;
+		const response = await getCustomersService(userId);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json(error.message);
@@ -48,6 +59,6 @@ const getAllCustomersController = async (req, res) => {
 
 module.exports = {
 	putAccountsDetailsController,
-	putBillingInfoController,
-	getAllCustomersController,
+	updateBillingInfoController,
+	getCustomersController,
 };

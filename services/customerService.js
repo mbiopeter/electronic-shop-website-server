@@ -1,12 +1,15 @@
 const Customers = require("../models/customers");
 const bcrypt = require("bcryptjs");
 
-const getAllCustomersService = async () => {
+const getCustomersService = async (userId) => {
 	try {
-		const customers = await Customers.findAll();
-		return { success: true, customers };
+		if (!userId) {
+			throw new Error("user id is required");
+		}
+		const customers = await Customers.findOne({ where: { id: userId }, attributes: ['email', 'firstName', 'lastName', 'streetAddress', 'apartment', 'town', 'phoneNumber'] });
+		return customers;
 	} catch (error) {
-		throw new Eror(errror.message);
+		throw new Error(error.message);
 	}
 };
 
@@ -18,13 +21,11 @@ const putAccountsDetailsService = async (id, data) => {
 			return { success: false, error: "Customer not found." };
 		}
 
-		// Validate Gmail format
 		const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 		if (data.email && !gmailRegex.test(data.email)) {
 			return { success: false, error: "Invalid email address." };
 		}
 
-		// Ensure both password and confirm password are provided
 		if (data.password && data.conPassword) {
 			if (data.password !== data.conPassword) {
 				return { success: false, error: "Passwords do not match." };
@@ -53,25 +54,20 @@ const putAccountsDetailsService = async (id, data) => {
 	}
 };
 
-// Update customer billing info
-const putBillingInfoService = async (id, data) => {
+const updateBillingInfoService = async (
+	userId,
+	firstName,
+	streetAdress,
+	apartment,
+	town,
+	phoneNumber
+) => {
 	try {
-		// Find the customer by ID
-		const customer = await Customers.findByPk(id);
-		if (!customer) {
-			return { success: false, error: "Customer not found." };
+		if (!firstName || !streetAdress || !town || !phoneNumber || !email) {
+			throw new Error('Ensure all the required fileds are not empty')
 		}
-
-		// Update only billing-related fields
-		const billingFields = ["streetAddress", "apartment", "town", "phoneNumber"];
-		billingFields.forEach((field) => {
-			if (data[field] !== undefined) {
-				customer[field] = data[field];
-			}
-		});
-
-		await customer.save();
-		return { success: true, customer };
+		const updateDetails = await Customers.update({ firstName, streetAdress, apartment, town, phoneNumber }, { where: { id: userId } });
+		return updateDetails;
 	} catch (error) {
 		return { success: false, error: error.message };
 	}
@@ -79,6 +75,6 @@ const putBillingInfoService = async (id, data) => {
 
 module.exports = {
 	putAccountsDetailsService,
-	putBillingInfoService,
-	getAllCustomersService,
+	updateBillingInfoService,
+	getCustomersService,
 };
