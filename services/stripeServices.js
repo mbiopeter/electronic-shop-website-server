@@ -24,7 +24,7 @@ const createCheckoutSession = async (cartItems, email, userId) => {
             line_items: lineItems,
             mode: 'payment',
             success_url: `${process.env.BASE_URL}/stripe/complete?session_id={CHECKOUT_SESSION_ID}&email=${email}&userId=${userId}&productIds=${JSON.stringify(productIds)}`,
-            cancel_url: `${process.env.BASE_URL}/cancel`,
+            cancel_url: `${process.env.BASE_URL}/stripe/cancel`,
             customer_email: email,
             billing_address_collection: 'required',
             shipping_address_collection: { allowed_countries: ['KE'] },

@@ -60,7 +60,7 @@ const completePayment = async (req, res) => {
 
 // Handle payment cancellation
 const cancelPayment = (req, res) => {
-    res.status(203).json({ cancelled: true });
+    res.redirect(`${process.env.CLIENT_HOME_URL}/cart`);
 };
 
 // Send email helper function

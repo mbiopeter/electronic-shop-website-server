@@ -125,7 +125,7 @@ const login = async (email, password) => {
 
             const verificationToken = generateVerificationToken(email);
             await Customer.update({ verificationCode: verificationToken }, { where: { email } });
-            const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+            const verificationLink = `${process.env.BASE_URL}/auth/verify?token=${verificationToken}`;
             const emailType = 'verify';
             await sendConfirmationEmail(email, verificationLink, emailType);
             throw new Error('Please verify your email address first');
