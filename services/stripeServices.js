@@ -1,6 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const createCheckoutSession = async (cartItems, email) => {
+const createCheckoutSession = async (cartItems, email, userId) => {
     try {
         const lineItems = cartItems.map(item => ({
             price_data: {
@@ -14,10 +14,16 @@ const createCheckoutSession = async (cartItems, email) => {
             quantity: item.quantity,
         }));
 
+        const productIds = [];
+
+        cartItems.map((item) => {
+            productIds.push(item.productId);
+        });
+
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
-            success_url: `${process.env.BASE_URL}/stripe/complete?session_id={CHECKOUT_SESSION_ID}&email=${email}`,
+            success_url: `${process.env.BASE_URL}/stripe/complete?session_id={CHECKOUT_SESSION_ID}&email=${email}&userId=${userId}&productIds=${JSON.stringify(productIds)}`,
             cancel_url: `${process.env.BASE_URL}/cancel`,
             customer_email: email,
             billing_address_collection: 'required',
@@ -25,6 +31,7 @@ const createCheckoutSession = async (cartItems, email) => {
         });
 
         return session.url;
+
     } catch (error) {
         throw new Error(error.message);
     }

@@ -2,26 +2,27 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Orders = sequelize.define('Orders', {
-    orderPlaced: {
-        type: DataTypes.DATE,
-        allowNull: true
+    productId: {
+        type: DataTypes.JSON,
+        allowNull: false,
     },
-    paymentAccepted: {
-        type: DataTypes.DATE,
-        allowNull: true
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
-    deliveryReady: {
-        type: DataTypes.DATE,
-        allowNull: true
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'Pending',
     },
-    delivered: {
-        type: DataTypes.DATE,
-        allowNull: true
+    payment: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    received: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
+    paymentCode: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 }, {
     timestamps: true,
 });

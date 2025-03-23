@@ -1,11 +1,12 @@
 const { createCheckoutSession, retrieveCheckoutSession } = require('../services/stripeServices');
+const { createOrderService, deletecartStripeService } = require('../services/orderServices');
 const nodemailer = require('nodemailer');
 
 // Checkout process
 const checkout = async (req, res) => {
-    const { cartItems, email } = req.body;
+    const { cartItems, email, userId } = req.body;
     try {
-        const sessionUrl = await createCheckoutSession(cartItems, email);
+        const sessionUrl = await createCheckoutSession(cartItems, email, userId);
         res.status(200).json({ url: sessionUrl });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -14,28 +15,44 @@ const checkout = async (req, res) => {
 
 // After successful payment, redirect user and send email
 const completePayment = async (req, res) => {
-    const { session_id, email } = req.query;
-
+    const { session_id, email, userId, productIds } = req.query;
+    const paymentMethod = 'bank';
+    const productIdsArray = JSON.parse(decodeURIComponent(productIds));
     try {
         const session = await retrieveCheckoutSession(session_id);
 
-        // Send an email to the user with the purchase details
-        const senderEmail = process.env.EMAIL_USER;
-        const subject = 'Thank You for Your Purchase!';
-        const message = `
-            Dear ${email},<br><br>
-            Thank you for your purchase! We have received your payment and your order is being processed.<br><br>
-            Order details:<br>
-            <strong>Order ID:</strong> ${session.id}<br>
-            <strong>Total:</strong> KES ${(session.amount_total / 100).toFixed(2)}<br><br>
-            You can follow the shipping process on our website <a href="${process.env.CLIENT_HOME_URL}/orders" target="_blank">active order</a>.<br><br>
-            If you have any questions, feel free to reach out to us.<br><br>
-            Best regards,<br>
-            Shoppers Team
-        `;
+        const deleteCart = await deletecartStripeService(
+            productIdsArray,
+            userId
+        );
 
-        await sendEmail(senderEmail, email, subject, message);
-        res.redirect(process.env.CLIENT_HOME_URL);
+        if (deleteCart) {
+            await createOrderService(
+                productIdsArray,
+                userId,
+                paymentMethod
+            );
+
+            // Send an email to the user with the purchase details
+            const senderEmail = process.env.EMAIL_USER;
+            const subject = 'Thank You for Your Purchase!';
+            const message = `
+                Dear ${email},<br><br>
+                Thank you for your purchase! We have received your payment and your order is being processed.<br><br>
+                Order details:<br>
+                <strong>Order ID:</strong> ${session.id}<br>
+                <strong>Total:</strong> KES ${(session.amount_total / 100).toFixed(2)}<br><br>
+                You can follow the shipping process on our website <a href="${process.env.CLIENT_HOME_URL}/orders" target="_blank">active order</a>.<br><br>
+                If you have any questions, feel free to reach out to us.<br><br>
+                Best regards,<br>
+                Shoppers Team
+            `;
+
+            await sendEmail(senderEmail, email, subject, message);
+
+
+            res.redirect(process.env.CLIENT_HOME_URL);
+        }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
