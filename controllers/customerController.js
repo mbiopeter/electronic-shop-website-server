@@ -24,14 +24,13 @@ const putAccountsDetailsController = async (req, res) => {
 const updateBillingInfoController = async (req, res) => {
 	try {
 		const {
-			userId,
 			firstName,
 			streetAdress,
 			apartment,
 			town,
 			phoneNumber,
 		} = req.body;
-
+		const { userId } = req.query;
 
 		await updateBillingInfoService(
 			userId,
@@ -43,6 +42,7 @@ const updateBillingInfoController = async (req, res) => {
 		);
 		res.json({ message: "Billing information updated successfully" });
 	} catch (error) {
+		console.log(error);
 		res.status(500).json(error.message);
 	}
 };

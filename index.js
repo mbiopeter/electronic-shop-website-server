@@ -10,6 +10,7 @@ const productsRoutes = require("./routes/productsRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const sliderRoutes = require("./routes/sliderRoutes");
 const stripeRoutes = require("./routes/stripeRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 6000;
@@ -26,6 +27,7 @@ app.use("/products", productsRoutes);
 app.use("/customer", customerRoutes);
 app.use("/slider", sliderRoutes);
 app.use("/stripe", stripeRoutes);
+app.use("/order", orderRoutes);
 
 // Log each request
 app.use((req, res, next) => {

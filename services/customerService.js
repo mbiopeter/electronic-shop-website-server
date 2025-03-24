@@ -57,19 +57,19 @@ const putAccountsDetailsService = async (id, data) => {
 const updateBillingInfoService = async (
 	userId,
 	firstName,
-	streetAdress,
+	streetAddress,
 	apartment,
 	town,
 	phoneNumber
 ) => {
 	try {
-		if (!firstName || !streetAdress || !town || !phoneNumber || !email) {
-			throw new Error('Ensure all the required fileds are not empty')
+		if (!firstName || !streetAddress || !town || !phoneNumber) {
+			throw new Error('Ensure all the required fileds are not empty');
 		}
-		const updateDetails = await Customers.update({ firstName, streetAdress, apartment, town, phoneNumber }, { where: { id: userId } });
+		const updateDetails = await Customers.update({ firstName, streetAddress, apartment, town, phoneNumber }, { where: { id: userId } });
 		return updateDetails;
 	} catch (error) {
-		return { success: false, error: error.message };
+		throw new Error(error);
 	}
 };
 
