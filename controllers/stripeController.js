@@ -15,48 +15,84 @@ const checkout = async (req, res) => {
 
 // After successful payment, redirect user and send email
 const completePayment = async (req, res) => {
-    const { session_id, email, userId, productIds } = req.query;
-    const paymentMethod = 'bank';
-    const productIdsArray = JSON.parse(decodeURIComponent(productIds));
     try {
-        const session = await retrieveCheckoutSession(session_id);
+        const { session_id, email, userId, cartItems } = req.query;
+        const paymentMethod = 'Bank Payment';
+        const cartItemsArray = JSON.parse(decodeURIComponent(cartItems));
 
-        const deleteCart = await deletecartStripeService(
-            productIdsArray,
-            userId
-        );
+        let productIds = [];
+        let productDetails = [];
+        let totalAmount = 0;
+
+        cartItemsArray.forEach((item) => {
+            const productId = item?.productId?.id || 'Unknown ID';
+            const quantity = item?.productId?.quantity || 0;
+            const name = item?.product || 'Unnamed Product';
+            const price = Number(item?.price) || 0;
+
+            productIds.push(productId);
+            productDetails.push({ id: productId, quantity });
+            totalAmount += price * quantity;
+        });
+
+        const session = await retrieveCheckoutSession(session_id);
+        const deleteCart = await deletecartStripeService(productIds, userId);
 
         if (deleteCart) {
-            await createOrderService(
-                productIdsArray,
-                userId,
-                paymentMethod
-            );
+            await createOrderService(productDetails, userId, paymentMethod);
 
-            // Send an email to the user with the purchase details
             const senderEmail = process.env.EMAIL_USER;
             const subject = 'Thank You for Your Purchase!';
+
+            let tableRows = '';
+            cartItemsArray.forEach((product, index) => {
+                const name = product?.product || 'Unnamed Product';
+                const price = Number(product?.price) || 0;
+                const quantity = product?.productId?.quantity || 0;
+                const total = price * quantity;
+
+                tableRows += `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${name}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">KES ${price.toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${quantity}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">KES ${total.toFixed(2)}</td>
+                    </tr>`;
+            });
+
             const message = `
-                Dear ${email},<br><br>
-                Thank you for your purchase! We have received your payment and your order is being processed.<br><br>
-                Order details:<br>
-                <strong>Order ID:</strong> ${session.id}<br>
-                <strong>Total:</strong> KES ${(session.amount_total / 100).toFixed(2)}<br><br>
-                You can follow the shipping process on our website <a href="${process.env.CLIENT_HOME_URL}/orders" target="_blank">active order</a>.<br><br>
-                If you have any questions, feel free to reach out to us.<br><br>
-                Best regards,<br>
-                Shoppers Team
+                <p>Dear ${email},</p>
+                <p>Thank you for your purchase! We have received your payment, and your order is being processed.</p>
+                <p><strong>Order Details:</strong></p>
+                <table style="border-collapse: collapse; width: 100%; text-align: left; font-family: Arial, sans-serif;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="padding: 8px; border: 1px solid #ddd;">#</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">Product</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">Price</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">Quantity</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+                <p><strong>Grand Total:</strong> KES ${totalAmount.toFixed(2)}</p>
+                <p>You can track your order <a href="${process.env.CLIENT_HOME_URL}/orders" target="_blank">here</a>.</p>
+                <p>If you have any questions, feel free to reach out to us.</p>
+                <p>Best regards,<br>Shoppers Team</p>
             `;
 
             await sendEmail(senderEmail, email, subject, message);
-
-
-            res.redirect(process.env.CLIENT_HOME_URL);
+            return res.redirect(process.env.CLIENT_HOME_URL);
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Handle payment cancellation
 const cancelPayment = (req, res) => {

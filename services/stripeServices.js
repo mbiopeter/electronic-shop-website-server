@@ -14,16 +14,10 @@ const createCheckoutSession = async (cartItems, email, userId) => {
             quantity: item.quantity,
         }));
 
-        const productIds = [];
-
-        cartItems.map((item) => {
-            productIds.push(item.productId);
-        });
-
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
-            success_url: `${process.env.BASE_URL}/stripe/complete?session_id={CHECKOUT_SESSION_ID}&email=${email}&userId=${userId}&productIds=${JSON.stringify(productIds)}`,
+            success_url: `${process.env.BASE_URL}/stripe/complete?session_id={CHECKOUT_SESSION_ID}&email=${email}&userId=${userId}&cartItems=${JSON.stringify(cartItems)}`,
             cancel_url: `${process.env.BASE_URL}/stripe/cancel`,
             customer_email: email,
             billing_address_collection: 'required',
