@@ -15,6 +15,30 @@ const Orders = sequelize.define('Orders', {
         allowNull: false,
         defaultValue: 'Pending',
     },
+    pending: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    processed: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    shipped: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    delivered: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    cancelled: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    returned: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
     payment: {
         type: DataTypes.STRING,
         allowNull: false,

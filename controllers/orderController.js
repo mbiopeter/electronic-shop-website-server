@@ -1,6 +1,7 @@
 const {
     createOrderService,
-    deletecartStripeService
+    deletecartStripeService,
+    getOrderService
 } = require('../services/orderServices');
 const nodemailer = require('nodemailer');
 
@@ -106,4 +107,17 @@ const sendEmail = async (from, to, subject, body) => {
     }
 };
 
-module.exports = { createOrderController }
+const getOrderController = async (req, res) => {
+    try {
+        const { orderId } = req.query;
+        const response = await getOrderService(orderId);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = {
+    createOrderController,
+    getOrderController
+}

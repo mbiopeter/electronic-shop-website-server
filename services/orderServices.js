@@ -1,4 +1,5 @@
 const Cart = require("../models/cart");
+const { format } = require('date-fns');
 const Orders = require("../models/orders");
 
 const createOrderService = async (productIds, userId, payment, paymentCode) => {
@@ -19,6 +20,7 @@ const createOrderService = async (productIds, userId, payment, paymentCode) => {
         throw new Error(error);
     }
 }
+
 const deletecartStripeService = async (productIds, userId) => {
     try {
 
@@ -32,7 +34,50 @@ const deletecartStripeService = async (productIds, userId) => {
     }
 }
 
+const getOrderService = async (orderId) => {
+    try {
+        const orders = await Orders.findOne({ where: { id: orderId } });
+        if (!orders) {
+            throw new Error('Order not found');
+        }
+
+        const formattedOrder = formatOrderDates(orders);
+        return formattedOrder;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
+const formatOrderDates = (order) => {
+    const dateFields = ['pending', 'processed', 'shipped', 'delivered', 'cancelled', 'returned'];
+    let formattedOrder = { ...order.get({ plain: true }) };
+
+    dateFields.forEach(field => {
+        if (formattedOrder[field]) {
+            formattedOrder[field] = format(new Date(formattedOrder[field]), 'dd MMMM yyyy hh:mm a');
+        }
+    });
+
+    return {
+        id: formattedOrder.id,
+        productId: JSON.parse(formattedOrder.productId || '[]'),
+        userId: formattedOrder.userId,
+        status: formattedOrder.status,
+        payment: formattedOrder.payment,
+        paymentCode: formattedOrder.paymentCode,
+        pending: formattedOrder.pending,
+        processed: formattedOrder.processed,
+        shipped: formattedOrder.shipped,
+        delivered: formattedOrder.delivered,
+        cancelled: formattedOrder.cancelled,
+        returned: formattedOrder.returned,
+        createdAt: format(new Date(formattedOrder.createdAt), 'dd MMMM yyyy hh:mm a'),
+        updatedAt: format(new Date(formattedOrder.updatedAt), 'dd MMMM yyyy hh:mm a')
+    };
+};
+
 module.exports = {
     createOrderService,
-    deletecartStripeService
+    deletecartStripeService,
+    getOrderService
 }
