@@ -15,10 +15,6 @@ const Orders = sequelize.define('Orders', {
         allowNull: false,
         defaultValue: 'Pending',
     },
-    pending: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
     processed: {
         type: DataTypes.DATE,
         allowNull: true,
@@ -28,6 +24,10 @@ const Orders = sequelize.define('Orders', {
         allowNull: true,
     },
     delivered: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    waitingDelivery: {
         type: DataTypes.DATE,
         allowNull: true,
     },
