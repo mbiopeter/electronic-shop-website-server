@@ -1,13 +1,13 @@
 const {
 	putAccountsDetailsService,
-	putBillingInfoService,
-	getCustomerService,
+	updateBillingInfoService,
+	getCustomersService,
 } = require("../services/customerService");
 
 const putAccountsDetailsController = async (req, res) => {
 	try {
-		const { id } = req.params; // Extract customer ID from URL
-		const updateData = req.body; // Get request body data
+		const { id } = req.params;
+		const updateData = req.body;
 		console.log(updateData);
 
 		const response = await putAccountsDetailsService(id, updateData);
@@ -21,30 +21,36 @@ const putAccountsDetailsController = async (req, res) => {
 	}
 };
 
-const putBillingInfoController = async (req, res) => {
+const updateBillingInfoController = async (req, res) => {
 	try {
-		const { id } = req.params; // Extract customer ID from URL
-		const updateData = req.body; // Get request body data
+		const {
+			firstName,
+			streetAdress,
+			apartment,
+			town,
+			phoneNumber,
+		} = req.body;
+		const { userId } = req.query;
 
-		const response = await putBillingInfoService(id, updateData);
-		if (!response.success) {
-			return res.status(400).json({ success: false, error: response.error });
-		}
-
-		res.json({ success: true, customer: response.customer });
+		await updateBillingInfoService(
+			userId,
+			firstName,
+			streetAdress,
+			apartment,
+			town,
+			phoneNumber,
+		);
+		res.json({ message: "Billing information updated successfully" });
 	} catch (error) {
+		console.log(error);
 		res.status(500).json(error.message);
 	}
 };
 
-const getCustomerController = async (req, res) => {
+const getCustomersController = async (req, res) => {
 	try {
-		const { id } = req.params;
-		const response = await getCustomerService(id);
-		if (!response.success) {
-			return res.status(400).json({ success: false, error: response.error });
-		}
-
+		const { userId } = req.query;
+		const response = await getCustomersService(userId);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json(error.message);
@@ -53,6 +59,6 @@ const getCustomerController = async (req, res) => {
 
 module.exports = {
 	putAccountsDetailsController,
-	putBillingInfoController,
-	getCustomerController,
+	updateBillingInfoController,
+	getCustomersController,
 };

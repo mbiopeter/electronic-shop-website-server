@@ -2,6 +2,7 @@ const Products = require("../models/products");
 const History = require("../models/history");
 const Wishlist = require("../models/wishlist");
 const { Sequelize, Op } = require("sequelize");
+const Rating = require("../models/rating");
 
 const shuffleArray = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -10,71 +11,54 @@ const shuffleArray = (array) => {
 	}
 	return array;
 };
-const formatProducts = (products) => {
-	return products.map((product) => {
+
+const formatProducts = async (products) => {
+	// Wait for all promises to resolve
+	const formattedProducts = await Promise.all(products.map(async (product) => {
 		const imgs = product.images ? JSON.parse(product.images) : [];
 		const imageUrl = imgs.map((img) => `http://localhost:4000/${img}`);
+
+		const variantType = product.variantType ? JSON.parse(product.variantType) : {};
+		const variantArray = Object.entries(variantType).map(([key, values]) => ({
+			name: key,
+			options: values,
+		}));
+
+		// Fetch sum of ratings and count of ratings for the product
+		const ratingData = await Rating.findOne({
+			attributes: [
+				[Sequelize.fn("SUM", Sequelize.col("rating")), "totalRating"],
+				[Sequelize.fn("COUNT", Sequelize.col("rating")), "ratingCount"],
+			],
+			where: { productId: product.id }
+		});
+
+
+
+		const totalRating = ratingData?.dataValues?.totalRating || 0;
+		const ratingCount = ratingData?.dataValues?.ratingCount || 0;
+		const averageRating = ratingCount > 0 ? Math.round(totalRating / ratingCount) : 0;
+
 		return {
 			id: product.id,
-			imageUrl,
+			images: imageUrl,
 			name: product.name,
 			category: product.category,
-			sub_category: product.subCategory,
+			subcategory: product.subCategory,
 			brand: product.brand,
 			desc: product.description,
 			price: parseFloat(product.price),
 			amountLeft: product.quantity,
 			salesCount: product.salesCount,
-			ratings: product.ratings,
-			ratingsCount: product.ratingsCount,
+			ratings: averageRating,
+			ratingsCount: ratingCount,
 			offerPrice: parseFloat(product.offerPrice),
 			quantity: product.quantity,
-			variantType: product.variantType ? JSON.parse(product.variantType) : [],
+			variantType: variantArray,
 		};
-	});
-};
+	}));
 
-//
-const insertProductsService = async () => {
-	try {
-		const products = await Products.bulkCreate([
-			{
-				name: "Wireless Bluetooth Headphones",
-				description: "Noise-canceling over-ear headphones with deep bass.",
-				category: "Electronics",
-				subCategory: "Headphones",
-				brand: "Sony",
-				price: 99.99,
-				offerPrice: 79.99,
-				quantity: 50,
-				variantType: { color: ["black", "white", "blue"] },
-				images: ["image1.jpg", "image2.jpg"],
-				ratings: 4,
-				ratingsCount: 250,
-				salesCount: 150,
-			},
-			{
-				name: "Gaming Laptop",
-				description: "High-performance gaming laptop with RTX 3060 GPU.",
-				category: "Computers",
-				subCategory: "Laptops",
-				brand: "ASUS",
-				price: 1499.99,
-				offerPrice: 1399.99,
-				quantity: 20,
-				variantType: {
-					RAM: ["16GB", "32GB"],
-					Storage: ["512GB SSD", "1TB SSD"],
-				},
-				images: ["laptop1.jpg", "laptop2.jpg"],
-				ratings: 5,
-				ratingsCount: 120,
-				salesCount: 80,
-			},
-		]);
-	} catch (error) {
-		throw new Error(error.message);
-	}
+	return formattedProducts; // Ensure the function returns the resolved data
 };
 
 const getAllProductsService = async () => {
@@ -178,18 +162,20 @@ const getHistoryService = async (userId) => {
 
 		const historyItems = await History.findAll({
 			where: { userId },
+			order: [['id', 'DESC']],
 		});
 
-		console.log("History Items:", historyItems);
 		const productIds = historyItems.map((item) => item.productId);
-		console.log("Product IDs from history:", productIds); // Debugging
 
 		const products = await Products.findAll({
 			where: { id: { [Op.in]: productIds } },
 		});
-		console.log("Products Found:", products); // Debugging
 
-		return formatProducts(products);
+		// Sort products based on history order
+		const productMap = new Map(products.map(product => [product.id, product]));
+		const sortedProducts = productIds.map(id => productMap.get(id));
+
+		return formatProducts(sortedProducts);
 	} catch (error) {
 		throw new Error(error.message);
 	}
@@ -218,6 +204,9 @@ const getHistoryRelatedService = async (userId) => {
 				where: {
 					category: {
 						[Op.in]: relatedProducts.map((p) => p.category),
+					},
+					id: {
+						[Op.notIn]: productIds, // Exclude history products
 					},
 				},
 				limit: 20,
@@ -265,12 +254,12 @@ const getWishlistService = async (userId) => {
 
 		const wishlistItems = await Wishlist.findAll({
 			where: { userId },
+			order: [['id', 'DESC']],
 		});
 
 		console.log("Wishlist Items:", wishlistItems);
 
 		const wishlistItemsIds = wishlistItems.map((item) => item.productId);
-		console.log("Product IDs from history:", wishlistItemsIds); // Debugging
 
 		const products = await Products.findAll({
 			where: { id: { [Op.in]: wishlistItemsIds } },
@@ -278,9 +267,11 @@ const getWishlistService = async (userId) => {
 		if (products.length === 0) {
 			throw new Error("No wishlist found");
 		}
-		console.log("Wishlist Found:", products); // Debugging
+		// Sort products based on history order
+		const productMap = new Map(products.map(product => [product.id, product]));
+		const sortedProducts = wishlistItemsIds.map(id => productMap.get(id));
 
-		return formatProducts(products);
+		return formatProducts(sortedProducts);
 	} catch (error) {
 		throw new Error(error.message);
 	}
@@ -302,9 +293,77 @@ const removeWishlistService = async (userId, productId) => {
 	}
 };
 
+const getWishlistRelatedService = async (userId) => {
+	try {
+		if (!userId) {
+			throw new Error("User ID cannot be blank");
+		}
+
+		const wishlist = await Wishlist.findAll({ where: { userId } });
+
+		if (wishlist.length > 0) {
+			const productIds = wishlist.map((item) => item.productId);
+
+			const relatedProducts = await Products.findAll({
+				where: {
+					id: {
+						[Op.in]: productIds,
+					},
+				},
+			});
+
+			const recommendedProducts = await Products.findAll({
+				where: {
+					category: {
+						[Op.in]: relatedProducts.map((p) => p.category),
+					},
+					id: {
+						[Op.notIn]: productIds,
+					},
+				},
+				limit: 20,
+			});
+
+			return formatProducts(recommendedProducts);
+		} else {
+			const allProducts = await Products.findAll({
+				limit: 100,
+			});
+
+			const shuffledProducts = shuffleArray(allProducts);
+
+			return formatProducts(shuffledProducts.slice(0, 20));
+		}
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
+const rateProductService = async (userId, productId, rating) => {
+	try {
+		if (!userId || !productId || !rating) {
+			throw new Error('All details are required')
+		}
+		const product = await Products.findOne({ where: { id: productId } });
+
+		//check if user has already rated the product
+		const hasRated = await Rating.findOne({ where: { userId, productId } });
+		if (hasRated) {
+			//update the ratings
+			const update = await Rating.update({ rating }, { where: { userId, productId } });
+			return update;
+		}
+		const upadatedCount = product.ratingsCount + 1;
+
+		await Rating.create({ userId, productId, rating });
+		const rate = await Products.update({ ratingsCount: upadatedCount }, { where: { id: productId } })
+		return rate;
+	} catch (error) {
+		throw new Error(error.message);
+	}
+}
 module.exports = {
 	getAllProductsService,
-	insertProductsService,
 	getAllBestSellingsService,
 	getScrollListProductsService,
 	getExploreProductsService,
@@ -314,4 +373,6 @@ module.exports = {
 	getWishlistService,
 	addWishlistService,
 	removeWishlistService,
+	getWishlistRelatedService,
+	rateProductService
 };

@@ -10,7 +10,8 @@ const {
 	addHistoryController,
 	getHistoryController,
 	getHistoryRelatedController,
-	insertProductsController,
+	getWishlistRelatedController,
+	rateProductController
 } = require("../controllers/productController");
 
 const router = express.Router();
@@ -19,13 +20,18 @@ router.get("/allproducts", getAllProductsController);
 router.get("/bestsellings", getAllBestSellingsController);
 router.get("/scrolllist", getScrollListProductsController);
 router.get("/explore", getExploreProductsController);
+
 router.post("/wishlist/add", addWishlistController);
-router.get("/wishlist/:userId", getWishlistController);
+router.get("/wishlist", getWishlistController);
 router.delete("/wishlist/remove", removeWishlistController);
-router.post("/insert", insertProductsController);
+router.get("/wishlist/recomend", getWishlistRelatedController);
 
 router.post("/history/new", addHistoryController);
-router.get("/history/:userId", getHistoryController);
+router.get("/history", getHistoryController);
 router.get("/history/recomend", getHistoryRelatedController);
+
+
+router.post("/rating/create", rateProductController);
+
 
 module.exports = router;

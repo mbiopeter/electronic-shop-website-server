@@ -206,17 +206,15 @@ const getCartServices = async (userId) => {
 		const result = cartItems.map((item) => {
 			const product = products.find((p) => p.id === item.productId);
 
-			const imgs = product.images ? JSON.parse(product.images) : [];
-			const imageUrl = imgs.map((img) => `http://localhost:4000/${img}`);
-
-			return {
-				id: item.id,
-				img: imageUrl[0] || null,
-				product: product.name,
-				price: product.offerPrice,
-				quantity: item.quantity,
-			};
-		});
+            return {
+                id: item.id,
+                productId: product.id,
+                img: imageUrl[0] || null,
+                product: product.name,
+                price: Number(product.offerPrice).toFixed(2),
+                quantity: Number.parseInt(item.quantity, 10) 
+            };
+        });
 
 		return result;
 	} catch (error) {

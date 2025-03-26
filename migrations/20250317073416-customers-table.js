@@ -21,6 +21,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
+      lastName: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       streetAddress: {
         type: Sequelize.STRING,
         allowNull: true
@@ -34,10 +38,6 @@ module.exports = {
         allowNull: true
       },
       phoneNumber: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      lastName: {
         type: Sequelize.STRING,
         allowNull: true
       },

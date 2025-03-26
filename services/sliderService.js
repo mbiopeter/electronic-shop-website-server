@@ -12,7 +12,7 @@ const getSliderService = async () => {
         // Format the returned data as requested
         const formattedSliderPosts = sliderPost.map(post => ({
             id: post.id,
-            image: post.image,
+            image: `http://localhost:4000/${post.img}`,
             title: post.title,
             discount: `Up to ${post.discount}% off Voucher`,
             buttonText: post.btn
@@ -24,27 +24,24 @@ const getSliderService = async () => {
     }
 };
 
-
 const getBannerService = async () => {
     try {
-        // Fetch 5 random posters from the database using Sequelize
-        const sliderPost = await Poster.findAll({
-            order: Sequelize.literal('RAND()'),
-            limit: 1
+        const sliderPost = await Poster.findOne({
+            order: Sequelize.literal('RAND()')
         });
 
-        // Format the returned data as requested
-        const formattedSliderPosts = sliderPost.map(post => ({
-            id: post.id,
-            image: post.image,
-            name: post.name,
-            description: post.description,
-            title: post.title,
-            discount: `Up to ${post.discount}% off Voucher`,
-            buttonText: post.btn
-        }));
-
-        return formattedSliderPosts;
+        if (!sliderPost) {
+            return null;
+        }
+        return {
+            id: sliderPost.id,
+            image: `http://localhost:4000/${sliderPost.img}`,
+            name: sliderPost.name,
+            description: sliderPost.description,
+            title: sliderPost.title,
+            discount: `Up to ${sliderPost.discount}% off Voucher`,
+            buttonText: sliderPost.btn
+        };
     } catch (error) {
         throw new Error(error.message);
     }

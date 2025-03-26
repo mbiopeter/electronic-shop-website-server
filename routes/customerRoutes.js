@@ -1,14 +1,14 @@
 const express = require("express");
 const {
 	putAccountsDetailsController,
-	putBillingInfoController,
-	getCustomerController,
+	updateBillingInfoController,
+	getCustomersController,
 } = require("../controllers/customerController");
 
 const router = express.Router();
 
-router.get("/customer/:id", getCustomerController);
+router.get("/customer/:id", getCustomersController);
 router.put("/accounts/:id", putAccountsDetailsController);
-router.put("/billings/:id", putBillingInfoController);
+router.post("/billing", updateBillingInfoController);
 
 module.exports = router;

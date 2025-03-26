@@ -36,9 +36,7 @@ const sendConfirmationEmail = async (email, verificationLink, type) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log("Verification email sent successfully");
     } catch (error) {
-        console.error('Error sending verification email:', error);
         throw new Error('Failed to send verification email');
     }
 };
@@ -48,7 +46,7 @@ const generateVerificationToken = (email) => {
 };
 
 const generateAuthToken = (user) => {
-    return jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET, { expiresIn: '24h' });
 };
 
 const signUp = async (email, name, password) => {
@@ -61,6 +59,10 @@ const signUp = async (email, name, password) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = generateVerificationToken(email);
 
+        const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+        const emailType = 'verify';
+        await sendConfirmationEmail(email, verificationLink, emailType);
+
         const newUser = await Customer.create({
             email,
             name,
@@ -68,10 +70,6 @@ const signUp = async (email, name, password) => {
             verified: false,
             verificationCode: verificationToken,
         });
-
-        const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
-        const emailType = 'verify';
-        await sendConfirmationEmail(email, verificationLink, emailType);
 
         return { newUser };
     } catch (error) {
@@ -127,7 +125,7 @@ const login = async (email, password) => {
 
             const verificationToken = generateVerificationToken(email);
             await Customer.update({ verificationCode: verificationToken }, { where: { email } });
-            const verificationLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+            const verificationLink = `${process.env.BASE_URL}/auth/verify?token=${verificationToken}`;
             const emailType = 'verify';
             await sendConfirmationEmail(email, verificationLink, emailType);
             throw new Error('Please verify your email address first');
