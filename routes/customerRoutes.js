@@ -2,12 +2,12 @@ const express = require("express");
 const {
 	putAccountsDetailsController,
 	putBillingInfoController,
-	getAllCustomersController,
+	getCustomerController,
 } = require("../controllers/customerController");
 
 const router = express.Router();
 
-router.get("/allcustomers", getAllCustomersController);
+router.get("/customer/:id", getCustomerController);
 router.put("/accounts/:id", putAccountsDetailsController);
 router.put("/billings/:id", putBillingInfoController);
 

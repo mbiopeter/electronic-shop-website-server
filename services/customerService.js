@@ -1,10 +1,11 @@
 const Customers = require("../models/customers");
 const bcrypt = require("bcryptjs");
 
-const getAllCustomersService = async () => {
+const getCustomerService = async (id) => {
 	try {
-		const customers = await Customers.findAll();
-		return { success: true, customers };
+		const customer = await Customers.findByPk(id);
+		console.log(customer);
+		return { success: true, customer };
 	} catch (error) {
 		throw new Error(error.message);
 	}
@@ -40,11 +41,12 @@ const putAccountsDetailsService = async (id, data) => {
 			"email",
 			"conPassword",
 		];
-		accountUpdateDetails.forEach((key) => {
-			if (data[key] !== undefined) {
-				customer[key] = data[key];
-			}
-		});
+
+		Object.keys(data)
+			.filter(
+				(key) => accountUpdateDetails.includes(key) && data[key] !== undefined
+			)
+			.forEach((key) => (customer[key] = data[key]));
 
 		await customer.save();
 		return { success: true, customer };
@@ -80,5 +82,5 @@ const putBillingInfoService = async (id, data) => {
 module.exports = {
 	putAccountsDetailsService,
 	putBillingInfoService,
-	getAllCustomersService,
+	getCustomerService,
 };

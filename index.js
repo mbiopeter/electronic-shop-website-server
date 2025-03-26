@@ -9,6 +9,8 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const productsRoutes = require("./routes/productsRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const sliderRoutes = require("./routes/sliderRoutes");
+const PaymentRoute = require("./routes/mpesaPaymentRoute");
+const CallbackRoute = require("./routes/mpesaCallbackRoute");
 
 const app = express();
 const PORT = process.env.PORT || 6000;
@@ -24,6 +26,8 @@ app.use("/category", categoryRoutes);
 app.use("/products", productsRoutes);
 app.use("/customer", customerRoutes);
 app.use("/slider", sliderRoutes);
+app.use("/payment_with_mpesa", PaymentRoute);
+app.use("/payment_with_mpesa", CallbackRoute);
 
 // Log each request
 app.use((req, res, next) => {
