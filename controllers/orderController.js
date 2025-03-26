@@ -109,8 +109,8 @@ const sendEmail = async (from, to, subject, body) => {
 
 const getOrderController = async (req, res) => {
     try {
-        const { orderId } = req.query;
-        const response = await getOrderService(orderId);
+        const { userId } = req.query;
+        const response = await getOrderService(userId);
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error.message });

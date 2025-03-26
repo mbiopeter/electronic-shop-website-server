@@ -22,6 +22,22 @@ module.exports = {
         allowNull: false,
         defaultValue: 'Pending'
       },
+      processed: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      shipped: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      delivered: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      waitingDelivery: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
       payment: {
         type: Sequelize.STRING,
         allowNull: false,

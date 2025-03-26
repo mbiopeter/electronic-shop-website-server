@@ -34,15 +34,14 @@ const deletecartStripeService = async (productIds, userId) => {
     }
 }
 
-const getOrderService = async (orderId) => {
+const getOrderService = async (userId) => {
     try {
-        const orders = await Orders.findOne({ where: { id: orderId } });
+        const orders = await Orders.findAll({ where: { userId } });
         if (!orders) {
             throw new Error('Order not found');
         }
 
-        const formattedOrder = formatOrderDates(orders);
-        return formattedOrder;
+        return orders.map(formatOrderDates); 
     } catch (error) {
         throw new Error(error.message);
     }
@@ -69,6 +68,7 @@ const formatOrderDates = (order) => {
         processed: formattedOrder.processed,
         shipped: formattedOrder.shipped,
         delivered: formattedOrder.delivered,
+        waitingDelivery: formattedOrder.waitingDelivery,
         cancelled: formattedOrder.cancelled,
         returned: formattedOrder.returned,
         createdAt: format(new Date(formattedOrder.createdAt), 'dd MMMM yyyy hh:mm a'),
