@@ -41,11 +41,12 @@ const putAccountsDetailsService = async (id, data) => {
 			"email",
 			"conPassword",
 		];
-		accountUpdateDetails.forEach((key) => {
-			if (data[key] !== undefined) {
-				customer[key] = data[key];
-			}
-		});
+
+		Object.keys(data)
+			.filter(
+				(key) => accountUpdateDetails.includes(key) && data[key] !== undefined
+			)
+			.forEach((key) => (customer[key] = data[key]));
 
 		await customer.save();
 		return { success: true, customer };

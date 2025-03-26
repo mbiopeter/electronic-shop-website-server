@@ -16,6 +16,8 @@ const createOrderController = async (req, res) => {
         let productDetails = [];
         let totalAmount = 0;
 
+        console.log(cartItems)
+
         cartItems.forEach((item) => {
             const productId = item?.productId?.id || 'Unknown ID';
             const quantity = item?.productId?.quantity || 0;
@@ -25,7 +27,7 @@ const createOrderController = async (req, res) => {
             productIds.push(productId);
             productDetails.push({ id: productId, quantity });
             totalAmount += price * quantity;
-        });
+        }); 
 
         const deleteCart = await deletecartStripeService(productIds, userId);
         if (deleteCart) {
