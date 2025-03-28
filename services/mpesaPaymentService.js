@@ -33,9 +33,9 @@ const createTokenService = async () => {
 	}
 };
 
-const stkPushService = async (req, res, response) => {
+const stkPushService = async (req, res) => {
 	try {
-		if (!req.body || !req.body.phoneNumber) {
+		if (!req.body || !req.body.phoneNumber || !req.body.amount) {
 			return res.status(400).json({ message: "Phone number is required" });
 		}
 
@@ -59,7 +59,7 @@ const stkPushService = async (req, res, response) => {
 			Password: password,
 			Timestamp: timestamp,
 			TransactionType: "CustomerPayBillOnline",
-			Amount: req.body.amount || 1,
+			Amount: req.body.amount,
 			PartyA: `254${phone}`,
 			PartyB: 174379,
 			PhoneNumber: `254${phone}`,
@@ -75,6 +75,8 @@ const stkPushService = async (req, res, response) => {
 				headers: { Authorization: `Bearer ${token}` },
 			}
 		);
+
+
 
 		return res.status(200).json(response.data);
 	} catch (error) {

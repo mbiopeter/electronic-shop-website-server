@@ -1,6 +1,9 @@
 const Transaction = require("../models/transaction"); // Import the model
 
+
+
 const mpesaCallbackService = async (req, res) => {
+	console.log("Hello, callback")
 	try {
 		console.log("M-Pesa Callback Response:", JSON.stringify(req.body, null, 2));
 

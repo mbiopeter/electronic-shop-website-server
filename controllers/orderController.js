@@ -14,8 +14,6 @@ const createOrderController = async (req, res) => {
         let productDetails = [];
         let totalAmount = 0;
 
-        console.log(cartItems)
-
         cartItems.forEach((item) => {
             const productId = item?.productId?.id || 'Unknown ID';
             const quantity = item?.productId?.quantity || 0;
@@ -25,7 +23,7 @@ const createOrderController = async (req, res) => {
             productIds.push(productId);
             productDetails.push({ id: productId, quantity });
             totalAmount += price * quantity;
-        }); 
+        });
 
         const deleteCart = await deletecartStripeService(productIds, userId);
         if (deleteCart) {
@@ -111,8 +109,8 @@ const sendEmail = async (from, to, subject, body) => {
 
 const getOrderController = async (req, res) => {
     try {
-        const { userId } = req.query;
-        const response = await getOrderService(userId);
+        const { orderId } = req.query;
+        const response = await getOrderService(orderId);
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error.message });

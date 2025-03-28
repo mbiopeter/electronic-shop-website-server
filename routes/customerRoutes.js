@@ -6,8 +6,7 @@ const {
 } = require("../controllers/customerController");
 
 const router = express.Router();
-
-router.get("/customer/:id", getCustomersController);
+router.get("", getCustomersController);
 router.put("/accounts/:id", putAccountsDetailsController);
 router.post("/billing", updateBillingInfoController);
 
