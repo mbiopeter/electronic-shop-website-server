@@ -62,7 +62,6 @@ const addCartService = async (productId, userId, quantity) => {
 
 const updateCartService = async (userId, data) => {
 	try {
-		// Validate input data
 		if (!Array.isArray(data)) {
 			throw new Error("Invalid input: 'data' must be an array!");
 		}
@@ -97,24 +96,12 @@ const updateCartService = async (userId, data) => {
 				);
 			}
 
-			// Handle cart update logic
 			if (cartItem) {
-				// Update existing cart item
 				const newCartQuantity = cartItem.quantity + quantity;
-
-				if (newCartQuantity <= 0) {
-					// Remove the item from the cart if the quantity becomes zero or negative
-					await Cart.destroy({ where: { userId, productId } });
-				} else {
-					// Update the cart item with the new quantity
-					await Cart.update(
-						{ quantity: newCartQuantity },
-						{ where: { userId, productId } }
-					);
-				}
-			} else {
-				// Add a new item to the cart
-				await Cart.create({ userId, productId, quantity });
+				await Cart.update(
+					{ quantity: newCartQuantity },
+					{ where: { userId, productId } }
+				);
 			}
 
 			// Update product stock and sales count
