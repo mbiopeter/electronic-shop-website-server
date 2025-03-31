@@ -7,7 +7,7 @@ const {
 
 const router = express.Router();
 
-router.get("/", getCustomersController);
+router.get("", getCustomersController);
 router.put("/accounts", putAccountsDetailsController);
 router.post("/billing", updateBillingInfoController);
 

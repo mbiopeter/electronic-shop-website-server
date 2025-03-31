@@ -9,9 +9,8 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const productsRoutes = require("./routes/productsRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const sliderRoutes = require("./routes/sliderRoutes");
-const mpesaPaymentRoute = require("./routes/mpesaPaymentRoute");
-const mpesaCallbackRoute = require("./routes/mpesaCallbackRoute");
-// const stripeRoutes = require("./routes/stripeRoutes");
+const stripeRoutes = require("./routes/stripeRoutes");
+const mpesaRoutes = require("./routes/mpesaRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
@@ -28,14 +27,18 @@ app.use("/category", categoryRoutes);
 app.use("/products", productsRoutes);
 app.use("/customer", customerRoutes);
 app.use("/slider", sliderRoutes);
-app.use("/payment_with_mpesa", mpesaPaymentRoute);
-app.use("/payment_with_mpesa", mpesaCallbackRoute);
+app.use("/mpesa", mpesaRoutes);
+app.use("/stripe", stripeRoutes);
 app.use("/order", orderRoutes);
 
 // Log each request
 app.use((req, res, next) => {
 	logger.info(`${req.method} ${req.url}`);
 	next();
+});
+
+app.get('/', (req, res) => {
+	res.send('Server running')
 });
 
 // Test DB connection and start server

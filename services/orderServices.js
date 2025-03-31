@@ -1,6 +1,7 @@
 const Cart = require("../models/cart");
 const { format } = require('date-fns');
 const Orders = require("../models/orders");
+const { Op } = require('sequelize'); 
 
 const createOrderService = async (productIds, userId, payment, paymentCode) => {
     try {
@@ -14,7 +15,6 @@ const createOrderService = async (productIds, userId, payment, paymentCode) => {
             payment,
             paymentCode,
         });
- 
         return createOrder;
     } catch (error) {
         throw new Error(error);
@@ -36,7 +36,8 @@ const deletecartStripeService = async (productIds, userId) => {
 
 const getOrderService = async (userId, orderId) => {
     try {
-        const order = await Orders.findOne({ where: { userId, id: orderId } });
+        //select * from orders where userId and orderId and status != cancelled
+        const order = await Orders.findOne({ where: { userId, id: orderId, status: { [Op.ne]: 'cancelled' } } });
         if (!order) {
             throw new Error('Order not found');
         }
@@ -82,6 +83,19 @@ const cancelledOrderService = async (userId) => {
         throw new Error(error.message);
     }
 };
+
+const cancelOrder = async (userId) => {
+    try {
+        if (!userId) {
+            throw new Error('User is needed');
+        }
+        const cancel = await Orders.update({ status: 'cancelled', cancelled: DATE.now() }, { where: { userId } });
+
+        return cancel;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
 
 const formatOrderDates = (order) => {
     const dateFields = ['pending', 'processed', 'shipped', 'delivered', 'cancelled', 'returned'];
