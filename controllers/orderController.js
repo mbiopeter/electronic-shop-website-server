@@ -27,7 +27,7 @@ const createOrderController = async (req, res) => {
             productIds.push(productId);
             productDetails.push({ id: productId, quantity });
             totalAmount += price * quantity;
-        }); 
+        });
 
         const deleteCart = await deletecartStripeService(productIds, userId);
         if (deleteCart) {
