@@ -47,11 +47,11 @@ const getOrderService = async (userId) => {
 
 const getOrdersWithProductsService = async (orderId) => {
 	try {
-		const orders = await Orders.findAll();
+		const orders = await Orders.findAll({ where: { orderId } });
 
 		const formattedOrders = await Promise.all(
 			orders.map(async (order) => {
-				const productData = JSON.parse(order.productId);
+				const productData = JSON.parse(order.productsId);
 
 				const items = await Promise.all(
 					productData.map(async (item) => {
