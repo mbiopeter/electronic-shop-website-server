@@ -6,8 +6,9 @@ const {
 } = require("../controllers/customerController");
 
 const router = express.Router();
+
 router.get("", getCustomersController);
-router.put("/accounts/:id", putAccountsDetailsController);
+router.post("/accounts", putAccountsDetailsController);
 router.post("/billing", updateBillingInfoController);
 
 module.exports = router;

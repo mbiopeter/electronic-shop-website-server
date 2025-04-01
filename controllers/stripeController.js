@@ -63,7 +63,7 @@ const completePayment = async (req, res) => {
 
             const message = `
                 <p>Dear ${email},</p>
-                <p>Thank you for your purchase! We have received your payment, and your order is being processed.</p>
+                <p>Thank you for your purchase through bank! We have received your payment, and your order is being processed.</p>
                 <p><strong>Order Details:</strong></p>
                 <table style="border-collapse: collapse; width: 100%; text-align: left; font-family: Arial, sans-serif;">
                     <thead>
@@ -80,7 +80,6 @@ const completePayment = async (req, res) => {
                     </tbody>
                 </table>
                 <p><strong>Grand Total:</strong> KES ${totalAmount.toFixed(2)}</p>
-                <p>You can track your order <a href="${process.env.CLIENT_HOME_URL}/orders" target="_blank">here</a>.</p>
                 <p>If you have any questions, feel free to reach out to us.</p>
                 <p>Best regards,<br>Shoppers Team</p>
             `;

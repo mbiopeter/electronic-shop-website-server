@@ -9,8 +9,9 @@ const {
 const router = express.Router();
 
 router.post("/new", addCartController);
-router.post("/update-cart/:userId", updateCartController);
+
+router.post("/update-cart", updateCartController);
 router.delete("/remove", deleteCartController);
-router.get("/all/:userId", getCartController);
+router.get("/all", getCartController);
 
 module.exports = router;

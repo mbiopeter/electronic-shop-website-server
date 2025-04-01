@@ -34,7 +34,7 @@ const updateCartController = async (req, res) => {
 
 const deleteCartController = async (req, res) => {
 	try {
-		const { cartId } = req.params;
+		const { cartId } = req.query;
 
 		// Validate that userId is provided
 		if (!cartId) {
@@ -50,7 +50,7 @@ const deleteCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
 	try {
-		const { userId } = req.params;
+		const { userId } = req.query;
 		// Validate that userId is provided
 		if (!userId) {
 			return res.status(400).json({ error: "User ID is required!" });

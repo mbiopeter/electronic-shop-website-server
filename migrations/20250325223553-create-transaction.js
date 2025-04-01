@@ -9,29 +9,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      MerchantRequestID: {
-        type: Sequelize.STRING
+      userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
-      CheckoutRequestID: {
-        type: Sequelize.STRING
+      phoneNumber: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
-      ResultCode: {
-        type: Sequelize.INTEGER
-      },
-      ResultDesc: {
-        type: Sequelize.STRING
-      },
-      Amount: {
-        type: Sequelize.INTEGER
-      },
-      PhoneNumber: {
-        type: Sequelize.STRING
-      },
-      TransactionDate: {
-        type: Sequelize.BIGINT
-      },
-      MPesaReceiptNumber: {
-        type: Sequelize.STRING
+      amount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       Status: {
         type: Sequelize.STRING

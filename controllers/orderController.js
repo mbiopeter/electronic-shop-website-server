@@ -2,6 +2,8 @@ const {
 	createOrderService,
 	deletecartStripeService,
 	getOrderService,
+	allOrdersService,
+	cancelledOrderService,
 	getOrdersWithProductsService,
 } = require("../services/orderServices");
 const nodemailer = require("nodemailer");
@@ -13,6 +15,8 @@ const createOrderController = async (req, res) => {
 		let productIds = [];
 		let productDetails = [];
 		let totalAmount = 0;
+
+		console.log(cartItems);
 
 		cartItems.forEach((item) => {
 			const productId = item?.productId?.id || "Unknown ID";
@@ -118,8 +122,28 @@ const sendEmail = async (from, to, subject, body) => {
 
 const getOrderController = async (req, res) => {
 	try {
-		const { orderId } = req.query;
-		const response = await getOrderService(orderId);
+		const { userId, orderId } = req.query;
+		const response = await getOrderService(userId, orderId);
+		res.status(200).json(response);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+const allOrdersController = async (req, res) => {
+	try {
+		const { userId } = req.query;
+		const response = await allOrdersService(userId);
+		res.status(200).json(response);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+const cancelledOrderController = async (req, res) => {
+	try {
+		const { userId } = req.query;
+		const response = await cancelledOrderService(userId);
 		res.status(200).json(response);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
@@ -138,5 +162,7 @@ const getOrdersWithProductsController = async (req, res) => {
 module.exports = {
 	createOrderController,
 	getOrderController,
+	allOrdersController,
+	cancelledOrderController,
 	getOrdersWithProductsController,
 };

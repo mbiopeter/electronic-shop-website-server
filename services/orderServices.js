@@ -1,6 +1,7 @@
 const Cart = require("../models/cart");
 const { format } = require("date-fns");
 const { Orders, Products } = require("../models");
+const { Op } = require("sequelize");
 
 const createOrderService = async (productIds, userId, payment, paymentCode) => {
 	try {
@@ -13,13 +14,11 @@ const createOrderService = async (productIds, userId, payment, paymentCode) => {
 			payment,
 			paymentCode,
 		});
-
 		return createOrder;
 	} catch (error) {
 		throw new Error(error);
 	}
 };
-
 const deletecartStripeService = async (productIds, userId) => {
 	try {
 		for (let i = 0; i < productIds.length; i++) {
@@ -32,14 +31,55 @@ const deletecartStripeService = async (productIds, userId) => {
 	}
 };
 
-const getOrderService = async (userId) => {
+const getOrderService = async (userId, orderId) => {
 	try {
-		const orders = await Orders.findAll({ where: { userId } });
-		if (!orders) {
+		//select * from orders where userId and orderId and status != cancelled
+		const order = await Orders.findOne({
+			where: { userId, id: orderId, status: { [Op.ne]: "cancelled" } },
+		});
+		if (!order) {
 			throw new Error("Order not found");
 		}
 
-		return orders.map(formatOrderDates);
+		return formatOrderDates(order);
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
+const allOrdersService = async (userId) => {
+	try {
+		const orders = await Orders.findAll({ where: { userId } });
+
+		if (!orders || orders.length === 0) {
+			throw new Error("Order not found");
+		}
+
+		return orders.map((order) => ({
+			id: order.id,
+			createdAt: format(new Date(order.createdAt), "dd MMMM yyyy hh:mm a"),
+		}));
+	} catch (error) {
+		throw new Error(error.message);
+	}
+};
+
+const cancelledOrderService = async (userId) => {
+	try {
+		const orders = await Orders.findAll({
+			where: { userId, status: "cancelled" },
+		});
+
+		if (!orders || orders.length === 0) {
+			throw new Error("No cancelled orders found");
+		}
+
+		return orders.map((order) => ({
+			id: order.id,
+			cancelledAt: order.cancelled
+				? format(new Date(order.cancelled), "dd MMMM yyyy hh:mm a")
+				: "N/A",
+		}));
 	} catch (error) {
 		throw new Error(error.message);
 	}
@@ -133,5 +173,7 @@ module.exports = {
 	createOrderService,
 	deletecartStripeService,
 	getOrderService,
+	allOrdersService,
+	cancelledOrderService,
 	getOrdersWithProductsService,
 };
